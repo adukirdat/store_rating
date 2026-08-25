@@ -36,4 +36,4 @@ const updatePasswordValidator = [
   ...passwordRules('newPassword'),
 ];
 
-module.exports = { loginValidator, signupValidator, updatePasswordValidator };
+module.exports = { loginValidator, passwordRules, signupValidator, updatePasswordValidator };
