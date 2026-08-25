@@ -4,3 +4,9 @@ node_modules/
 coverage/
 dist/
 .DS_Store
+
+# Codex / AI tooling
+backend/.agents/
+backend/.claude/
+backend/.windsurf/
+backend/skills-lock.json
