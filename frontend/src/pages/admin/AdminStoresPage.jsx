@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getStores, getUsers } from '../../api/adminApi.js';
 import CreateStoreForm from '../../components/admin/CreateStoreForm.jsx';
 import { formatRating, getApiMessage } from '../../components/admin/adminUtils.js';
@@ -12,7 +12,8 @@ import PageContainer from '../../components/layout/PageContainer.jsx';
 
 function AdminStoresPage() {
   const [stores, setStores] = useState(null); const [owners, setOwners] = useState([]); const [searchInput, setSearchInput] = useState(''); const [search, setSearch] = useState(''); const [sortBy, setSortBy] = useState('name'); const [order, setOrder] = useState('asc'); const [error, setError] = useState(''); const [success, setSuccess] = useState('');
-  const loadStores = async () => { setError(''); setStores(null); try { const data = await getStores({ ...(search && { search }), sortBy, order }); setStores(data.stores); } catch (requestError) { setError(getApiMessage(requestError)); setStores([]); } };
+  const latestRequest = useRef(0);
+  const loadStores = async () => { const requestId = ++latestRequest.current; setError(''); setStores(null); try { const data = await getStores({ ...(search && { search }), sortBy, order }); if (requestId === latestRequest.current) setStores(data.stores); } catch (requestError) { if (requestId === latestRequest.current) { setError(getApiMessage(requestError)); setStores([]); } } };
   useEffect(() => { loadStores(); }, [search, sortBy, order]);
   useEffect(() => { getUsers({ role: 'STORE_OWNER', sortBy: 'name', order: 'asc' }).then((data) => setOwners(data.users)).catch(() => setOwners([])); }, []);
   const applySearch = (event) => { event.preventDefault(); setSearch(searchInput.trim()); };

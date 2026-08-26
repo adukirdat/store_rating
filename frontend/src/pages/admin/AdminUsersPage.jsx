@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getUsers } from '../../api/adminApi.js';
 import CreateUserForm from '../../components/admin/CreateUserForm.jsx';
@@ -13,7 +13,8 @@ import PageContainer from '../../components/layout/PageContainer.jsx';
 
 function AdminUsersPage() {
   const [users, setUsers] = useState(null); const [searchInput, setSearchInput] = useState(''); const [search, setSearch] = useState(''); const [role, setRole] = useState(''); const [sortBy, setSortBy] = useState('name'); const [order, setOrder] = useState('asc'); const [error, setError] = useState(''); const [success, setSuccess] = useState('');
-  const load = async () => { setError(''); setUsers(null); try { const data = await getUsers({ ...(search && { search }), ...(role && { role }), sortBy, order }); setUsers(data.users); } catch (requestError) { setError(getApiMessage(requestError)); setUsers([]); } };
+  const latestRequest = useRef(0);
+  const load = async () => { const requestId = ++latestRequest.current; setError(''); setUsers(null); try { const data = await getUsers({ ...(search && { search }), ...(role && { role }), sortBy, order }); if (requestId === latestRequest.current) setUsers(data.users); } catch (requestError) { if (requestId === latestRequest.current) { setError(getApiMessage(requestError)); setUsers([]); } } };
   useEffect(() => { load(); }, [search, role, sortBy, order]);
   const applySearch = (event) => { event.preventDefault(); setSearch(searchInput.trim()); };
   const created = (message) => { setSuccess(message); load(); };

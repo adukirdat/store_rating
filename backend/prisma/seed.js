@@ -3,9 +3,13 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const prisma = require('../src/config/prisma');
 
-const demoPassword = 'DemoPassword@1';
-
 async function seed() {
+  const demoPassword = process.env.SEED_DEMO_PASSWORD;
+
+  if (!demoPassword) {
+    throw new Error('SEED_DEMO_PASSWORD is required to run the local development seed.');
+  }
+
   const password = await bcrypt.hash(demoPassword, 10);
 
   const admin = await prisma.user.upsert({

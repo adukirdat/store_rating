@@ -39,6 +39,7 @@ model Store {
 
 model Rating {
   id        String   @id @default(uuid()) @db.Uuid
+  // The initial PostgreSQL migration enforces an integer value from 1 through 5 inclusive.
   value     Int
   userId    String   @db.Uuid
   storeId   String   @db.Uuid

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getStores } from '../../api/userApi.js';
 import StoreRatingForm from '../../components/user/StoreRatingForm.jsx';
 import { formatRating, getUserApiMessage } from '../../components/user/userUtils.js';
@@ -12,7 +12,8 @@ import PageContainer from '../../components/layout/PageContainer.jsx';
 
 function UserStoresPage() {
   const [stores, setStores] = useState(null); const [searchInput, setSearchInput] = useState(''); const [search, setSearch] = useState(''); const [sortBy, setSortBy] = useState('name'); const [order, setOrder] = useState('asc'); const [error, setError] = useState(''); const [success, setSuccess] = useState('');
-  const load = async () => { setError(''); try { const data = await getStores({ ...(search && { search }), sortBy, order }); setStores(data.stores); } catch (requestError) { setError(getUserApiMessage(requestError)); setStores([]); } };
+  const latestRequest = useRef(0);
+  const load = async () => { const requestId = ++latestRequest.current; setError(''); try { const data = await getStores({ ...(search && { search }), sortBy, order }); if (requestId === latestRequest.current) setStores(data.stores); } catch (requestError) { if (requestId === latestRequest.current) { setError(getUserApiMessage(requestError)); setStores([]); } } };
   useEffect(() => { setStores(null); load(); }, [search, sortBy, order]);
   const applySearch = (event) => { event.preventDefault(); setSuccess(''); setSearch(searchInput.trim()); };
   const clearSearch = () => { setSearchInput(''); setSearch(''); };
