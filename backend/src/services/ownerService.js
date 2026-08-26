@@ -9,7 +9,11 @@ const calculateAverage = (ratings) => {
   return ratings.reduce((total, rating) => total + rating.value, 0) / ratings.length;
 };
 
-const getDashboard = async (ownerId) => {
+const ratingsOrderBy = (sortBy, order) => (sortBy === 'rating'
+  ? { value: order }
+  : { user: { [sortBy]: order } });
+
+const getDashboard = async ({ ownerId, sortBy = 'name', order = 'asc' }) => {
   const store = await prisma.store.findUnique({
     where: { ownerId },
     select: {
@@ -29,7 +33,7 @@ const getDashboard = async (ownerId) => {
             },
           },
         },
-        orderBy: { updatedAt: 'desc' },
+        orderBy: ratingsOrderBy(sortBy, order),
       },
     },
   });

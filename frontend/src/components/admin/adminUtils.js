@@ -8,11 +8,11 @@ export const validateUser = ({ name, email, password, address, role }) => ({
   email: !emailPattern.test(email) ? 'Enter a valid email address.' : '',
   password: password.length < 8 || password.length > 16 ? 'Password must be 8 to 16 characters long.' : (!/[A-Z]/.test(password) ? 'Password must contain at least one uppercase letter.' : (!/[^A-Za-z0-9]/.test(password) ? 'Password must contain at least one special character.' : '')),
   address: !address.trim() ? 'Address is required.' : (address.trim().length > 400 ? 'Address must not exceed 400 characters.' : ''),
-  role: ['ADMIN', 'NORMAL_USER'].includes(role) ? '' : 'Choose an allowed role.',
+  role: ['ADMIN', 'NORMAL_USER', 'STORE_OWNER'].includes(role) ? '' : 'Choose an allowed role.',
 });
 
 export const validateStore = ({ name, email, address, ownerId }) => ({
-  name: name.trim() ? '' : 'Store name is required.',
+  name: !name.trim() ? 'Store name is required.' : (name.trim().length < 20 || name.trim().length > 60 ? 'Store name must be 20 to 60 characters long.' : ''),
   email: !emailPattern.test(email) ? 'Enter a valid email address.' : '',
   address: !address.trim() ? 'Address is required.' : (address.trim().length > 400 ? 'Address must not exceed 400 characters.' : ''),
   ownerId: ownerId ? '' : 'Select a store owner.',

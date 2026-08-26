@@ -1,6 +1,6 @@
 const { body, param, query } = require('express-validator');
 const { passwordRules } = require('./authValidator');
-const { ROLES, ROLE_VALUES } = require('../utils/roles');
+const { ROLE_VALUES } = require('../utils/roles');
 
 const userSortFields = ['name', 'email', 'address', 'role'];
 const storeSortFields = ['name', 'email', 'address'];
@@ -10,7 +10,7 @@ const createUserValidator = [
   body('email').trim().isEmail().withMessage('email must be a valid email address.').normalizeEmail(),
   body('address').trim().notEmpty().withMessage('address is required.').isLength({ max: 400 }).withMessage('address must not exceed 400 characters.'),
   ...passwordRules('password'),
-  body('role').isIn([ROLES.ADMIN, ROLES.NORMAL_USER]).withMessage('role must be ADMIN or NORMAL_USER.'),
+  body('role').isIn(ROLE_VALUES).withMessage(`role must be one of: ${ROLE_VALUES.join(', ')}.`),
 ];
 
 const listUsersValidator = [
@@ -25,7 +25,7 @@ const userIdValidator = [
 ];
 
 const createStoreValidator = [
-  body('name').trim().notEmpty().withMessage('name is required.'),
+  body('name').trim().notEmpty().withMessage('name is required.').isLength({ min: 20, max: 60 }).withMessage('name must be 20 to 60 characters long.'),
   body('email').trim().isEmail().withMessage('email must be a valid email address.').normalizeEmail(),
   body('address').trim().notEmpty().withMessage('address is required.').isLength({ max: 400 }).withMessage('address must not exceed 400 characters.'),
   body('ownerId').isUUID().withMessage('ownerId must be a valid UUID.'),

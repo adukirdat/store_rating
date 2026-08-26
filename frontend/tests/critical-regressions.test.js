@@ -7,6 +7,7 @@ import {
   normalizeApiError,
   shouldClearSessionOnUnauthorized,
 } from '../src/api/apiError.js';
+import { validateStore, validateUser } from '../src/components/admin/adminUtils.js';
 
 const storage = new Map();
 global.window = { localStorage: {
@@ -49,4 +50,23 @@ test('M-01 request sequence guards remain on all list pages', () => {
 
   const source = fs.readFileSync('src/pages/user/UserStoresPage.jsx', 'utf8');
   assert.match(source, /latestRequest\.current/);
+});
+
+test('assignment-gap client validation permits Store Owners and enforces store name boundaries', () => {
+  const validUser = { name: 'A Store Owner With Valid Name', email: 'owner@example.test', password: 'ValidPass@1', address: '123 Valid Assignment Address', role: 'STORE_OWNER' };
+  assert.equal(validateUser(validUser).role, '');
+
+  const baseStore = { email: 'store@example.test', address: '123 Valid Assignment Address', ownerId: 'owner-id' };
+  assert.match(validateStore({ ...baseStore, name: 'x'.repeat(19) }).name, /20 to 60/);
+  assert.equal(validateStore({ ...baseStore, name: 'x'.repeat(20) }).name, '');
+  assert.equal(validateStore({ ...baseStore, name: 'x'.repeat(60) }).name, '');
+  assert.match(validateStore({ ...baseStore, name: 'x'.repeat(61) }).name, /20 to 60/);
+});
+
+test('owner dashboard keeps a latest-request guard and exposes the supported sort controls', () => {
+  const source = fs.readFileSync(path.join('src/pages/owner/OwnerDashboardPage.jsx'), 'utf8');
+  assert.match(source, /latestRequest\.current/);
+  for (const sortField of ['name', 'email', 'rating']) {
+    assert.match(source, new RegExp(`<option value="${sortField}">`));
+  }
 });

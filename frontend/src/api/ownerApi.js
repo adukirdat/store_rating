@@ -1,3 +1,3 @@
 import api from './axios.js';
 
-export const getOwnerDashboard = async () => (await api.get('/owner/dashboard')).data.data;
+export const getOwnerDashboard = async (params) => (await api.get('/owner/dashboard', { params })).data.data;
