@@ -1,3 +1,5 @@
+import { getResilienceApiMessage } from '../../api/apiError.js';
+
 export const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const hasErrors = (errors) => Object.values(errors).some(Boolean);
 
@@ -23,6 +25,8 @@ export const getApiMessage = (error) => {
   if (error.status === 404) return 'The requested resource was not found.';
   if (error.status === 409) return 'A record with these details already exists.';
   if (error.status === 400) return 'Please check the entered information.';
+  const resilienceMessage = getResilienceApiMessage(error);
+  if (resilienceMessage) return resilienceMessage;
   return 'Something went wrong. Please try again.';
 };
 

@@ -1,5 +1,5 @@
 function LoadingState({ label = 'Loading…' }) {
-  return <main className="state-page" aria-live="polite"><p>{label}</p></main>;
+  return <div className="state-page" aria-live="polite"><p>{label}</p></div>;
 }
 
 export default LoadingState;

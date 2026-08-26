@@ -1,3 +1,5 @@
+import { getResilienceApiMessage } from '../../api/apiError.js';
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const validatePassword = (password) => {
@@ -32,6 +34,8 @@ export const getApiErrors = (error, context) => {
   if (error.status === 409) return { fields, message: 'An account with this email already exists.' };
   if (error.status === 401 && context === 'login') return { fields, message: 'Invalid email or password.' };
   if (error.status === 401 && context === 'password') return { fields, message: 'Current password is incorrect.' };
+  const resilienceMessage = getResilienceApiMessage(error);
+  if (resilienceMessage) return { fields, message: resilienceMessage };
   if ([400, 403, 404].includes(error.status)) return { fields, message: 'We could not complete that request. Please check your details and try again.' };
   return { fields, message: 'Something went wrong. Please try again.' };
 };
