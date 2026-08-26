@@ -1,6 +1,13 @@
 const TIMEOUT_MESSAGE = 'The request took too long. Please try again.';
 const RATE_LIMIT_MESSAGE = 'Too many authentication attempts. Please try again later.';
 
+export const shouldClearSessionOnUnauthorized = (error, normalizedError) => !(
+  error.config?.method === 'patch'
+  && error.config?.url === '/auth/update-password'
+  && normalizedError.status === 401
+  && normalizedError.message === 'Current password is incorrect.'
+);
+
 export const normalizeApiError = (error) => {
   const response = error?.response;
 

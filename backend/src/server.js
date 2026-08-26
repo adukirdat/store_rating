@@ -87,43 +87,51 @@ app.get('/api/ready', async (request, response) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const server = app.listen(port, () => {
-  console.log(`Store Rating API listening on port ${port}`);
-});
-
-let isShuttingDown = false;
-
-const shutdown = (signal) => {
-  if (isShuttingDown) {
-    return;
-  }
-
-  isShuttingDown = true;
-  writeLog('info', 'shutdown_started', { signal });
-
-  const forceExitTimer = setTimeout(() => {
-    writeLog('error', 'shutdown_timeout');
-    process.exit(1);
-  }, 30_000);
-  forceExitTimer.unref();
-
-  server.close(async (serverError) => {
-    try {
-      if (serverError) {
-        throw serverError;
-      }
-
-      await prisma.$disconnect();
-      clearTimeout(forceExitTimer);
-      writeLog('info', 'shutdown_complete');
-      process.exit(0);
-    } catch (error) {
-      clearTimeout(forceExitTimer);
-      writeLog('error', 'shutdown_failed', { errorType: error.name || 'Error' });
-      process.exit(1);
-    }
+const startServer = () => {
+  const server = app.listen(port, () => {
+    console.log(`Store Rating API listening on port ${port}`);
   });
+  let isShuttingDown = false;
+
+  const shutdown = (signal) => {
+    if (isShuttingDown) {
+      return;
+    }
+
+    isShuttingDown = true;
+    writeLog('info', 'shutdown_started', { signal });
+
+    const forceExitTimer = setTimeout(() => {
+      writeLog('error', 'shutdown_timeout');
+      process.exit(1);
+    }, 30_000);
+    forceExitTimer.unref();
+
+    server.close(async (serverError) => {
+      try {
+        if (serverError) {
+          throw serverError;
+        }
+
+        await prisma.$disconnect();
+        clearTimeout(forceExitTimer);
+        writeLog('info', 'shutdown_complete');
+        process.exit(0);
+      } catch (error) {
+        clearTimeout(forceExitTimer);
+        writeLog('error', 'shutdown_failed', { errorType: error.name || 'Error' });
+        process.exit(1);
+      }
+    });
+  };
+
+  process.once('SIGTERM', () => shutdown('SIGTERM'));
+  process.once('SIGINT', () => shutdown('SIGINT'));
+  return server;
 };
 
-process.once('SIGTERM', () => shutdown('SIGTERM'));
-process.once('SIGINT', () => shutdown('SIGINT'));
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { app, startServer };
