@@ -174,10 +174,40 @@ There is no dedicated isolated PostgreSQL integration-test database yet. Critica
 1. Configure production environment variables, including explicit `CLIENT_URL`, private `DATABASE_URL`, and private `JWT_SECRET`.
 2. Install dependencies and run `npx prisma migrate deploy` from `backend/`.
 3. Build the frontend with `npm run build` from `frontend/`.
-4. Serve frontend assets through HTTPS-capable hosting with appropriate CSP and static-host security headers.
+4. Serve `frontend/dist/` through HTTPS-capable hosting. Configure an appropriate CSP, `X-Content-Type-Options`, `Referrer-Policy`, frame protection, and secure domain/redirect settings at the hosting layer.
 5. Start the backend with `npm start`, then verify `/api/health` and `/api/ready`.
 
 Do not run the development seed in production.
+
+`SEED_DEMO_PASSWORD` is not required for normal API startup and must remain a manual, local-development seed input only.
+
+## Production smoke-test checklist
+
+Run these checks after deployment without printing credentials, tokens, or secrets.
+
+### Infrastructure
+
+- Frontend loads over HTTPS and calls the configured `VITE_API_BASE_URL`.
+- Backend starts with `NODE_ENV=production`, explicit `CLIENT_URL`, `DATABASE_URL`, and `JWT_SECRET`.
+- PostgreSQL is reachable; `/api/health` returns `200` and `/api/ready` returns `200`.
+- Confirm `/api/ready` returns a safe `503` rather than database details when the database is intentionally unavailable in a controlled environment.
+
+### Application flows
+
+- Authenticate, log out, and, where enabled, sign up and update a password.
+- As an `ADMIN`, verify dashboard data, user/store creation, search, and sorting.
+- As a `NORMAL_USER`, verify store listing, search/sort, rating submission, and rating update.
+- As a `STORE_OWNER`, verify the assigned-store dashboard, average rating, and rating/user information.
+
+### Security responses
+
+- Unauthenticated protected requests return `401`.
+- A valid user with the wrong role receives `403`.
+- Malformed input returns `400`; an unknown route returns `404`.
+- Repeated authentication attempts receive `429` at the configured limits: login `10/15 minutes`, signup `5/15 minutes`, password update `5/15 minutes`.
+- Confirm response headers are supplied by both the API and static host as intended, and that no secrets appear in logs.
+
+Production process managers and container platforms should deliver `SIGTERM` so the backend can close HTTP intake and disconnect Prisma cleanly.
 
 ## Development workflow
 
