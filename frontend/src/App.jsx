@@ -13,6 +13,9 @@ import PlaceholderPage from './pages/common/PlaceholderPage.jsx';
 import RoleEntryPage from './pages/common/RoleEntryPage.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import AdminRoute from './routes/AdminRoute.jsx';
+import UserRoute from './routes/UserRoute.jsx';
+import UserLayout from './layouts/UserLayout.jsx';
+import UserStoresPage from './pages/user/UserStoresPage.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import PublicRoute from './routes/PublicRoute.jsx';
 
@@ -31,8 +34,12 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/app" element={<RoleEntryPage />} />
             <Route path="/app/update-password" element={<UpdatePasswordPage />} />
-            <Route path="/user" element={<PlaceholderPage title="Store workspace" description="Store browsing interface will be added in a later phase." />} />
             <Route path="/owner" element={<PlaceholderPage title="Owner workspace" description="Store Owner interface will be added in a later phase." />} />
+          </Route>
+          <Route element={<UserRoute />}>
+            <Route element={<UserLayout />}>
+              <Route path="/user" element={<UserStoresPage />} />
+            </Route>
           </Route>
           <Route element={<AdminRoute />}>
             <Route element={<AdminLayout />}>
