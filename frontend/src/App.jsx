@@ -16,6 +16,9 @@ import AdminRoute from './routes/AdminRoute.jsx';
 import UserRoute from './routes/UserRoute.jsx';
 import UserLayout from './layouts/UserLayout.jsx';
 import UserStoresPage from './pages/user/UserStoresPage.jsx';
+import OwnerRoute from './routes/OwnerRoute.jsx';
+import OwnerLayout from './layouts/OwnerLayout.jsx';
+import OwnerDashboardPage from './pages/owner/OwnerDashboardPage.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import PublicRoute from './routes/PublicRoute.jsx';
 
@@ -34,7 +37,6 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/app" element={<RoleEntryPage />} />
             <Route path="/app/update-password" element={<UpdatePasswordPage />} />
-            <Route path="/owner" element={<PlaceholderPage title="Owner workspace" description="Store Owner interface will be added in a later phase." />} />
           </Route>
           <Route element={<UserRoute />}>
             <Route element={<UserLayout />}>
@@ -47,6 +49,11 @@ function App() {
               <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route path="/admin/users/:userId" element={<AdminUserDetailsPage />} />
               <Route path="/admin/stores" element={<AdminStoresPage />} />
+            </Route>
+          </Route>
+          <Route element={<OwnerRoute />}>
+            <Route element={<OwnerLayout />}>
+              <Route path="/owner" element={<OwnerDashboardPage />} />
             </Route>
           </Route>
         </Route>
