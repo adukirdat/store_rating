@@ -9,10 +9,15 @@ export const getStoredAuth = () => {
 
   try {
     const auth = JSON.parse(rawValue);
-    return auth?.token && auth?.user ? auth : null;
+    if (auth?.token && auth?.user && auth.user.role) {
+      return auth;
+    }
   } catch {
-    return null;
+    // Invalid persisted data is not a restorable session.
   }
+
+  clearStoredAuth();
+  return null;
 };
 
 export const storeAuth = (auth) => {
