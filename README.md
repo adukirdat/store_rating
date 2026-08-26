@@ -141,6 +141,14 @@ The backend is authoritative for authentication, roles, ownership, user identity
 
 The frontend stores the JWT session in `localStorage` for the current bearer-token SPA model. This is exposed to XSS if arbitrary script execution is possible; enforce a strong hosting CSP and avoid untrusted scripts. Frontend route guards are navigation aids only, not authorization.
 
+## Operational signals
+
+Backend logs are machine-readable JSON. Request logs include timestamp, level, event, method, path (without query parameters), status, and duration. Safe error logs add an error type; database-readiness failures and rate-limit events have dedicated event names. Health and readiness checks are excluded from routine request logs to avoid probe noise.
+
+Operators can use `/api/health` to determine whether the Node/Express process is live and `/api/ready` to determine whether PostgreSQL is reachable. A `503` from `/api/ready` is a safe database-readiness failure and does not expose connection details. Startup validation fails clearly for missing required configuration without printing its values. Shutdown logs record started, completed, timeout, and failure events.
+
+Logs intentionally exclude request bodies, query strings, authorization headers, cookies, credentials, password material, JWTs, and connection strings. Correlation IDs are not currently required for this small API; add them later only if multi-service troubleshooting makes the current method/path/status/duration logs insufficient.
+
 ## Testing and validation
 
 Regression tests do not modify the developer database. Backend HTTP tests use mocked Prisma; database-specific checks inspect migration/source until an isolated PostgreSQL test database is available.

@@ -54,6 +54,19 @@ test('health, readiness, and security headers are available', async () => {
   assert.equal(health.headers.get('x-content-type-options'), 'nosniff');
 });
 
+test('readiness returns a safe 503 when the database is unavailable', async () => {
+  fakePrisma.$queryRaw = async () => { throw new Error('database unavailable'); };
+  const response = await fetch(`${baseUrl}/api/ready`);
+  fakePrisma.$queryRaw = async () => [{ ready: 1 }];
+
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), {
+    success: false,
+    message: 'Store Rating API is not ready.',
+    errors: [],
+  });
+});
+
 test('malformed JSON and protected routes return safe status codes', async () => {
   const malformed = await fetch(`${baseUrl}/api/auth/login`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{',
