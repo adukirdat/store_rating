@@ -77,6 +77,8 @@ Environment files are ignored by Git. Never commit real values.
 | `DATABASE_URL` | Yes | PostgreSQL connection string for Prisma; keep private. |
 | `JWT_SECRET` | Yes | JWT signing and verification secret; keep private. |
 | `CLIENT_URL` | Required in production; local default is `http://localhost:5173` | Allowed frontend CORS origin. |
+| `ADMIN_BOOTSTRAP_EMAIL` | Production only; defaults to `admin@example.com` | Email for the one bootstrap ADMIN account. Set an organization-controlled address in Render. |
+| `ADMIN_BOOTSTRAP_PASSWORD` | Production only | Private initial password for the bootstrap ADMIN. Set only in Render environment settings; never commit it or expose it to the frontend. |
 | `SEED_DEMO_PASSWORD` | Local seed only | Private password used by the idempotent development seed. |
 
 ### Frontend (`frontend/.env`)
@@ -179,15 +181,16 @@ There is no dedicated isolated PostgreSQL integration-test database yet. Critica
 
 ## Deployment checklist
 
-1. Configure production environment variables, including explicit `CLIENT_URL`, private `DATABASE_URL`, and private `JWT_SECRET`.
-2. Install dependencies and run `npx prisma migrate deploy` from `backend/`.
-3. Build the frontend with `npm run build` from `frontend/`.
-4. Serve `frontend/dist/` through HTTPS-capable hosting. Configure an appropriate CSP, `X-Content-Type-Options`, `Referrer-Policy`, frame protection, and secure domain/redirect settings at the hosting layer.
-5. Start the backend with `npm start`, then verify `/api/health` and `/api/ready`.
+1. In Render, configure explicit `NODE_ENV=production`, `DATABASE_URL`, `JWT_SECRET`, `CLIENT_URL`, `ADMIN_BOOTSTRAP_EMAIL`, and `ADMIN_BOOTSTRAP_PASSWORD`. The password is a Render secret; never commit it or add it to Vercel.
+2. Set the Render backend Build Command to `cd backend && npm ci && npx prisma generate && npx prisma migrate deploy`. This generates Prisma Client and applies reviewed migrations before startup.
+3. Set the Render backend Start Command to `cd backend && npm start`. Startup creates the bootstrap ADMIN only when absent, does not reset an existing ADMIN password, and fails safely if the configured email belongs to a non-admin account or bootstrap configuration is invalid.
+4. In Vercel, set only `VITE_API_BASE_URL` to the Render backend URL, then build the frontend with `npm run build` from `frontend/`.
+5. Serve `frontend/dist/` through HTTPS-capable hosting. Configure an appropriate CSP, `X-Content-Type-Options`, `Referrer-Policy`, frame protection, and secure domain/redirect settings at the hosting layer.
+6. Verify `/api/health` and `/api/ready` after deployment.
 
 Do not run the development seed in production.
 
-`SEED_DEMO_PASSWORD` is not required for normal API startup and must remain a manual, local-development seed input only.
+`SEED_DEMO_PASSWORD` is not required for normal API startup and must remain a manual, local-development seed input only. The production bootstrap never seeds demo users or ratings and is skipped outside `NODE_ENV=production`.
 
 ## Production smoke-test checklist
 

@@ -4,10 +4,11 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "start": "node src/scripts/bootstrapAdmin.js && node src/server.js",
+    "bootstrap:admin": "node src/scripts/bootstrapAdmin.js",
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:seed": "node prisma/seed.js",
-    "test": "node --test tests/api-security.test.js tests/database-regressions.test.js"
+    "test": "node --test tests/api-security.test.js tests/database-regressions.test.js tests/admin-bootstrap.test.js"
   },
   "keywords": [],
   "author": "",
