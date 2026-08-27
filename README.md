@@ -2,6 +2,24 @@
 
 Store Rating is a role-based web application for discovering stores and managing customer ratings. It supports `ADMIN`, `NORMAL_USER`, and `STORE_OWNER` roles.
 
+## 🔐 Demo Credentials
+
+| Role        | Email                    | Password                           |
+| ----------- | ------------------------ | ---------------------------------- |
+| Admin       | `admin@example.com`      | Set via Render `Test@1234`         |
+| Store Owner | `owner.prod@example.com` | Password created during demo setup |
+
+### Normal User
+
+No predefined Normal User credentials are required.
+
+Create your own Normal User account from the **Sign Up** page to test the Normal User workflow.
+
+- Frontend: `https://store-rating-delta.vercel.app`
+- Backend API: `https://store-rating-api-oy4p.onrender.com`
+
+The Admin account is automatically bootstrapped in production using `ADMIN_BOOTSTRAP_PASSWORD`. The Store Owner account is a demo account created through the Admin workflow. Passwords and secrets must **not** be committed to the repository; Normal Users can create their own account through public signup.
+
 ## Architecture
 
 The React/Vite frontend calls the Express API. The API authenticates JWT bearer tokens, enforces roles and ownership, and uses Prisma 7 with PostgreSQL.
@@ -70,22 +88,22 @@ Environment files are ignored by Git. Never commit real values.
 
 ### Backend (`backend/.env`)
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `NODE_ENV` | No (defaults to `development`) | Runtime environment. |
-| `PORT` | No (defaults to `5000`) | API listening port. |
-| `DATABASE_URL` | Yes | PostgreSQL connection string for Prisma; keep private. |
-| `JWT_SECRET` | Yes | JWT signing and verification secret; keep private. |
-| `CLIENT_URL` | Required in production; local default is `http://localhost:5173` | Allowed frontend CORS origin. |
-| `ADMIN_BOOTSTRAP_EMAIL` | Production only; defaults to `admin@example.com` | Email for the one bootstrap ADMIN account. Set an organization-controlled address in Render. |
-| `ADMIN_BOOTSTRAP_PASSWORD` | Production only | Private initial password for the bootstrap ADMIN. Set only in Render environment settings; never commit it or expose it to the frontend. |
-| `SEED_DEMO_PASSWORD` | Local seed only | Private password used by the idempotent development seed. |
+| Variable                   | Required                                                         | Purpose                                                                                                                                  |
+| -------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                 | No (defaults to `development`)                                   | Runtime environment.                                                                                                                     |
+| `PORT`                     | No (defaults to `5000`)                                          | API listening port.                                                                                                                      |
+| `DATABASE_URL`             | Yes                                                              | PostgreSQL connection string for Prisma; keep private.                                                                                   |
+| `JWT_SECRET`               | Yes                                                              | JWT signing and verification secret; keep private.                                                                                       |
+| `CLIENT_URL`               | Required in production; local default is `http://localhost:5173` | Allowed frontend CORS origin.                                                                                                            |
+| `ADMIN_BOOTSTRAP_EMAIL`    | Production only; defaults to `admin@example.com`                 | Email for the one bootstrap ADMIN account. Set an organization-controlled address in Render.                                             |
+| `ADMIN_BOOTSTRAP_PASSWORD` | Production only                                                  | Private initial password for the bootstrap ADMIN. Set only in Render environment settings; never commit it or expose it to the frontend. |
+| `SEED_DEMO_PASSWORD`       | Local seed only                                                  | Private password used by the idempotent development seed.                                                                                |
 
 ### Frontend (`frontend/.env`)
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `VITE_API_BASE_URL` | Yes | API base URL. |
+| Variable            | Required | Purpose       |
+| ------------------- | -------- | ------------- |
+| `VITE_API_BASE_URL` | Yes      | API base URL. |
 
 `VITE_*` variables are embedded in the browser bundle. They must never contain secrets, credentials, JWT secrets, or database URLs.
 
@@ -122,14 +140,14 @@ node prisma/seed.js
 - `NORMAL_USER`: browses, searches, and sorts stores; submits or updates ratings; updates password.
 - `STORE_OWNER`: views their assigned store and rating information.
 
-| Group | Purpose | Access |
-| --- | --- | --- |
-| `/api/auth` | Signup, login, password update. | Signup/login public; password update authenticated. |
-| `/api/admin` | Dashboard, users, stores. | `ADMIN`. |
-| `/api/stores` | Store browsing and ratings. | `NORMAL_USER`. |
-| `/api/owner` | Assigned-store dashboard. | `STORE_OWNER`. |
-| `/api/health` | Liveness check. | Public. |
-| `/api/ready` | Database-aware readiness check. | Public. |
+| Group         | Purpose                         | Access                                              |
+| ------------- | ------------------------------- | --------------------------------------------------- |
+| `/api/auth`   | Signup, login, password update. | Signup/login public; password update authenticated. |
+| `/api/admin`  | Dashboard, users, stores.       | `ADMIN`.                                            |
+| `/api/stores` | Store browsing and ratings.     | `NORMAL_USER`.                                      |
+| `/api/owner`  | Assigned-store dashboard.       | `STORE_OWNER`.                                      |
+| `/api/health` | Liveness check.                 | Public.                                             |
+| `/api/ready`  | Database-aware readiness check. | Public.                                             |
 
 The backend is authoritative for authentication, roles, ownership, user identity, and rating ownership.
 
